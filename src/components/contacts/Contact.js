@@ -1,26 +1,22 @@
 import React, { Component } from "react";
+import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
-import { Consumer } from "../context";
+import { Consumer } from "../../context";
+import axios from "axios";
 
-export default class Contact extends Component {
+class Contact extends Component {
   state = {
     showContactInfo: false
   };
-  onShowClick = e => {
-    this.setState({
-      showContactInfo: !this.state.showContactInfo
-    });
+
+  onDeleteClick = async (id, dispatch) => {
+    try {
+      await axios.delete(`https://jsonplaceholder.typicode.com/users/${id}`);
+      dispatch({ type: "DELETE_CONTACT", payload: id });
+    } catch (e) {
+      dispatch({ type: "DELETE_CONTACT", payload: id });
+    }
   };
-
-  onDeleteClick = (id, dispatch) => {
-    dispatch({ type: "DELETE_CONTACT", payload: id });
-  };
-
-  // with this.onclick we can bind "this" of the clicked element. since we did destructiuring we acces this.props.contact  (name) . so through this we access the props in the context of a single contact.
-
-  // this spares us from using .childelement . value and such , we dont need to traverse the dom .. but acces state / props ( easier)
-
-  // this.onShowClick.bind(this , name)
 
   render() {
     const { id, name, email, phone } = this.props.contact;
@@ -35,7 +31,11 @@ export default class Contact extends Component {
               <h4>
                 {name}{" "}
                 <i
-                  onClick={this.onShowClick}
+                  onClick={() =>
+                    this.setState({
+                      showContactInfo: !this.state.showContactInfo
+                    })
+                  }
                   className="fas fa-sort-down"
                   style={{ cursor: "pointer" }}
                 />
@@ -44,6 +44,17 @@ export default class Contact extends Component {
                   style={{ cursor: "pointer", float: "right", color: "red" }}
                   onClick={this.onDeleteClick.bind(this, id, dispatch)}
                 />
+                <Link to={`contact/edit/${id}`}>
+                  <i
+                    className="fas fa-pencil-alt"
+                    style={{
+                      cursor: "pointer",
+                      float: "right",
+                      color: "black",
+                      marginRight: "1rem"
+                    }}
+                  />
+                </Link>
               </h4>
               {showContactInfo ? (
                 <ul className="list-group">
@@ -62,3 +73,5 @@ export default class Contact extends Component {
 Contact.propTypes = {
   contact: PropTypes.object.isRequired
 };
+
+export default Contact;
